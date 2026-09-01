@@ -9,7 +9,7 @@ uses
 const
   CRLF=#10;
   kApplicationName='QuickPutty';
-  kVersion = 'v1.1.7';
+  kVersion = 'v1.1.8';
   kFullApplicationName=kApplicationName+' '+kVersion;
   kCopyright = '(c)2001-2003 Olivier DECKMYN, olivier@deckmyn.org, (c)2013 Gerhard WIESINGER, lists@wiesinger.com';
   kLicense= 'This software complies to LGPL license, see http://www.gnu.org/licenses/lgpl.txt';
@@ -85,6 +85,8 @@ type
     KiTTYConfigPath : String;
     KiTTY_Ignore_Session_Filter : String;
     KiTTY_Sort_Directories_First : boolean;
+    KiTTY_Sort_Directories_Case_Insensitive : boolean;
+    KiTTY_Sort_Files_Case_Insensitive : boolean;
     SessionShortCuts: Boolean;
     SessionsStartMenu: Boolean;
     procedure Populate();
@@ -209,6 +211,8 @@ begin
     ini.WriteString(kSectionName, 'KiTTYConfigPath', KiTTYConfigPath);
     ini.WriteString(kSectionName, 'KiTTYIgnoreSessionFilter', KiTTY_Ignore_Session_Filter);
     ini.WriteBool(kSectionName, 'KiTTYSortDirectoriesFirst', KiTTY_Sort_Directories_First);
+    ini.WriteBool(kSectionName, 'KiTTYSortDirectoriesCaseInsensitive', KiTTY_Sort_Directories_Case_Insensitive);
+    ini.WriteBool(kSectionName, 'KiTTYSortFilesCaseInsensitive', KiTTY_Sort_Files_Case_Insensitive);
     ini.WriteBool(kSectionName, 'session_shortcuts', SessionShortCuts);
     ini.WriteBool(kSectionName, 'sessions_startmenu', SessionsStartMenu);
   finally
@@ -246,6 +250,8 @@ begin
     KiTTYConfigPath:=ini.ReadString(kSectionName, 'KiTTYConfigPath', KiTTYConfigPath);
     KiTTY_Ignore_Session_Filter:=ini.ReadString(kSectionName, 'KiTTYIgnoreSessionFilter', KiTTY_Ignore_Session_Filter);
     KiTTY_Sort_Directories_First:=ini.ReadBool(kSectionName, 'KiTTYSortDirectoriesFirst', False);
+    KiTTY_Sort_Directories_Case_Insensitive:=ini.ReadBool(kSectionName, 'KiTTYSortDirectoriesCaseInsensitive', False);
+    KiTTY_Sort_Files_Case_Insensitive:=ini.ReadBool(kSectionName, 'KiTTYSortFilesCaseInsensitive', False);
     SessionShortCuts := ini.ReadBool(kSectionName, 'session_shortcuts', False);
     SessionsStartMenu := ini.ReadBool(kSectionName, 'sessions_startmenu', False);
   finally

@@ -1,4 +1,4 @@
-QuickPutty v1.1.7
+QuickPutty v1.1.8
 ---
 
 This is a stupid application that allows to quickly launch a putty/KiTTY session.

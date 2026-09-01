@@ -35,6 +35,8 @@ type
     Button2: TButton;
     EDT_KiTTY_Ignore_Session_Filter: TLabeledEdit;
     CBX_KiTTY_Sort_Directories_First: TCheckBox;
+    CBX_KiTTY_Sort_Directories_Case_Insensitive: TCheckBox;
+    CBX_KiTTY_Sort_Files_Case_Insensitive: TCheckBox;
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure BTN_OkClick(Sender: TObject);
@@ -95,7 +97,115 @@ begin
   InFilterList:=False;
 end;
 
-procedure FileSearch(const PathName, FileName: String; const RelPathName: String; const Recursive: boolean; const Filter: String; Sort_Directories_First:boolean; Sessions: TStrings);
+function CompareFileName(FileName1, FileName2: String; CaseInsensitive: Boolean = False): Integer;
+begin
+  if CaseInsensitive then
+  begin
+    FileName1:= LowerCase(FileName1);
+    FileName2:= LowerCase(FileName2);
+  end;
+
+  if FileName1 = FileName2 then
+  begin
+    CompareFileName:= 0;
+    Exit;
+  end;
+
+  if FileName1 < FileName2 then
+  begin
+    CompareFileName:= -1;
+    Exit;
+  end;
+
+  CompareFileName:= 1;
+end;
+
+function ComparePathName(PathName1, PathName2: String; CaseInsensitive: Boolean = False): Integer;
+begin
+  ComparePathName:=CompareFileName(PathName1, PathName2, CaseInsensitive);
+end;
+
+function ComparePathAndFileName(File1, File2: String; ReverseSearch: Boolean = False; CaseInsensitiveDirectories: Boolean = False; CaseInsensitiveFiles: Boolean = False): Integer;
+var
+  Path1, Path2: String;
+  FileName1, FileName2: String;
+  position1, position2: Integer;
+  Res: Integer;
+  ReverseMultiplier: Integer;
+begin
+  ReverseMultiplier:= 1;
+  if ReverseSearch then
+    ReverseMultiplier:= -1;
+
+  if File1 = File2 then
+  begin
+    ComparePathAndFileName:= 0;
+    Exit;
+  end;
+
+  Path1:=ExtractFilePath(File1);
+  FileName1:= ExtractFileName(File1);
+
+  Path2:=ExtractFilePath(File2);
+  FileName2:= ExtractFileName(File2);
+
+  position1:=Pos('\', Path1);
+  position2:=Pos('\', Path2);
+
+  { 2 files without path }
+  if (position1=0) and (position2=0) then
+  begin
+    ComparePathAndFileName:=CompareFileName(FileName1, FileName2, CaseInsensitiveFiles);
+    Exit;
+  end;
+
+  { 1st file without path, second with path }
+  if position1=0 then
+  begin
+    { Here is the difference between 2 sorting orders! }
+    ComparePathAndFileName:= ReverseMultiplier;
+    Exit;
+  end;
+
+  { 1st file with path, second without path }
+  if position2=0 then
+  begin
+    { Here is the difference between 2 sorting orders! }
+    ComparePathAndFileName:= -ReverseMultiplier;
+    Exit;
+  end;
+
+  { 2 files with path }
+  { 2 files with path, compare 1st directory part }
+  Res:= ComparePathName(Copy(Path1, 1, position1-1), Copy(Path2, 1, position2-1), CaseInsensitiveDirectories);
+  if Res <> 0 then
+  begin
+    { Different 1st directory part, so we have the result }
+    ComparePathAndFileName:= Res;
+    Exit;
+  end;
+
+  { 2 files with path, and same 1st directory part, compare the rest of the path and filename }
+  ComparePathAndFileName:=ComparePathAndFileName(Copy(Path1, position1+1, Length(Path1)) + FileName1,
+                                                 Copy(Path2, position2+1, Length(Path2)) + FileName2,
+                                                 ReverseSearch, CaseInsensitiveDirectories, CaseInsensitiveFiles);
+end;
+
+function SortPathAndFileName(List: TStringList; Index1, Index2: Integer): Integer;
+begin
+  SortPathAndFileName:=ComparePathAndFileName(List[Index1], List[Index2], False,
+    FRM_Main.KiTTY_Sort_Directories_Case_Insensitive,
+    FRM_Main.KiTTY_Sort_Files_Case_Insensitive);
+end;
+
+function SortPathAndFileNameReverse(List: TStringList; Index1, Index2: Integer): Integer;
+begin
+  SortPathAndFileNameReverse:=ComparePathAndFileName(List[Index1], List[Index2], True,
+    FRM_Main.KiTTY_Sort_Directories_Case_Insensitive,
+    FRM_Main.KiTTY_Sort_Files_Case_Insensitive);
+end;
+
+procedure FileSearchInternal(const PathName, FileName: String; const RelPathName: String; const Recursive: boolean; const Filter: String; Sort_Directories_First:boolean; slist: TStringList);
 var
   Rec: TSearchRec;
   Path: String;
@@ -103,25 +213,6 @@ var
   CurrentRelFileName: String;
 begin
   Path := IncludeTrailingBackslash(PathName);
-  If Sort_Directories_First and Recursive then
-  begin
-    if FindFirst(Path + '*', faDirectory, Rec) = 0 then
-      try
-        repeat
-          if ((Rec.Attr and faDirectory) <> 0)  and (Rec.Name<>'.') and (Rec.Name<>'..') then
-          begin
-            if RelPathName='' then
-              CurrentRelPathName:=Rec.Name
-            else
-              CurrentRelPathName:=RelPathName + '\' + Rec.Name;
-
-            FileSearch(Path + Rec.Name, FileName, CurrentRelPathName, Recursive, Filter, Sort_Directories_First, Sessions);
-          end;
-        until FindNext(Rec) <> 0;
-      finally
-        FindClose(Rec);
-      end;
-  end;
 
   if FindFirst(Path + FileName, faAnyFile - faDirectory, Rec) = 0 then
     try
@@ -132,13 +223,13 @@ begin
           CurrentRelFileName:=RelPathName + '\' + Rec.Name;
 
         if not InFilterList(CurrentRelFileName, Filter) then
-          Sessions.Add(CurrentRelFileName);
+          slist.Add(CurrentRelFileName);
       until FindNext(Rec) <> 0;
     finally
       FindClose(Rec);
     end;
 
-  If not Sort_Directories_First and Recursive then
+  If Recursive then
   begin
     if FindFirst(Path + '*', faDirectory, Rec) = 0 then
       try
@@ -150,14 +241,36 @@ begin
             else
               CurrentRelPathName:=RelPathName + '\' + Rec.Name;
 
-            FileSearch(Path + Rec.Name, FileName, CurrentRelPathName, Recursive, Filter, Sort_Directories_First, Sessions);
+            FileSearchInternal(Path + Rec.Name, FileName, CurrentRelPathName, Recursive, Filter, Sort_Directories_First, slist);
           end;
         until FindNext(Rec) <> 0;
       finally
         FindClose(Rec);
       end;
   end;
+end;
 
+procedure FileSearch(const PathName, FileName: String; const RelPathName: String; const Recursive: boolean; const Filter: String; Sort_Directories_First:boolean; Sessions: TStrings);
+var
+  slist: TStringList;
+  i: Integer;
+begin
+  slist:= TStringList.Create;
+  try
+    FileSearchInternal(PathName, FileName, RelPathName, Recursive, Filter, Sort_Directories_First, slist);
+
+    if Sort_Directories_First then
+      slist.CustomSort(SortPathAndFileName)
+    else
+      slist.CustomSort(SortPathAndFileNameReverse);
+
+    for i:=0 to slist.Count-1 do
+    begin
+      Sessions.Add(slist[i]);
+    end;
+  finally
+    slist.Free;
+  end;
 end;
 
 procedure GetStoredSessions(FromKiTTY: Boolean; ConfigPath: String; const Filter: String; Sort_Directories_First: boolean; Sessions: TStrings);
@@ -207,7 +320,6 @@ begin
   If position > 0 Then
     GetSessionNameForSession:=Copy(SelectedSessionName, position + 1, Length(SelectedSessionName))
 end;
-
 
 function GetCommandForSession(PuttyPath: String; SelectedSessionName: String): String;
 var
@@ -356,6 +468,8 @@ begin
     FRM_Main.KiTTYConfigPath:=EDT_KiTTYConfigPath.Text;
     FRM_Main.KiTTY_Ignore_Session_Filter:=EDT_KiTTY_Ignore_Session_Filter.Text;
     FRM_Main.KiTTY_Sort_Directories_First:=CBX_KiTTY_Sort_Directories_First.Checked;
+    FRM_Main.KiTTY_Sort_Directories_Case_Insensitive:=CBX_KiTTY_Sort_Directories_Case_Insensitive.Checked;
+    FRM_Main.KiTTY_Sort_Files_Case_Insensitive:=CBX_KiTTY_Sort_Files_Case_Insensitive.Checked;
 
     Close;
   end;
@@ -382,6 +496,8 @@ begin
   EDT_KiTTYConfigPath.Text:=FRM_Main.KiTTYConfigPath;
   EDT_KiTTY_Ignore_Session_Filter.Text:=FRM_Main.KiTTY_Ignore_Session_Filter;
   CBX_KiTTY_Sort_Directories_First.Checked:=(FRM_Main.KiTTY_Sort_Directories_First);
+  CBX_KiTTY_Sort_Directories_Case_Insensitive.Checked:=(FRM_Main.KiTTY_Sort_Directories_Case_Insensitive);
+  CBX_KiTTY_Sort_Files_Case_Insensitive.Checked:=(FRM_Main.KiTTY_Sort_Files_Case_Insensitive);
 
   // Check if AutoRun feature is enabled.
   if Reg.OpenKey('\Software\Microsoft\Windows\CurrentVersion\Run', False) then
@@ -483,6 +599,8 @@ begin
     EDT_KiTTYConfigPath.Enabled:=True;
     EDT_KiTTY_Ignore_Session_Filter.Enabled:=True;
     CBX_KiTTY_Sort_Directories_First.Enabled:=True;
+    CBX_KiTTY_Sort_Directories_Case_Insensitive.Enabled:=True;
+    CBX_KiTTY_Sort_Files_Case_Insensitive.Enabled:=True;
     Button2.Enabled:=True;
   end
   else
@@ -490,6 +608,8 @@ begin
     EDT_KiTTYConfigPath.Enabled:=False;
     EDT_KiTTY_Ignore_Session_Filter.Enabled:=False;
     CBX_KiTTY_Sort_Directories_First.Enabled:=False;
+    CBX_KiTTY_Sort_Directories_Case_Insensitive.Enabled:=False;
+    CBX_KiTTY_Sort_Files_Case_Insensitive.Enabled:=False;
     Button2.Enabled:=False;
   end;
 end;

@@ -4,7 +4,7 @@ object FRM_Config: TFRM_Config
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Configuration'
-  ClientHeight = 526
+  ClientHeight = 570
   ClientWidth = 442
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -21,21 +21,21 @@ object FRM_Config: TFRM_Config
   TextHeight = 13
   object Label1: TLabel
     Left = 8
-    Top = 488
+    Top = 536
     Width = 181
     Height = 13
     Caption = 'See Help Screen for more informations'
   end
   object Label5: TLabel
     Left = 8
-    Top = 504
+    Top = 552
     Width = 121
     Height = 13
     Caption = '(press F1 on main screen)'
   end
   object BTN_Cancel: TButton
     Left = 360
-    Top = 488
+    Top = 536
     Width = 75
     Height = 25
     Cancel = True
@@ -45,7 +45,7 @@ object FRM_Config: TFRM_Config
   end
   object BTN_Ok: TButton
     Left = 280
-    Top = 488
+    Top = 536
     Width = 75
     Height = 25
     Caption = '&Ok'
@@ -78,7 +78,7 @@ object FRM_Config: TFRM_Config
   end
   object GRB_Transparency: TGroupBox
     Left = 8
-    Top = 240
+    Top = 288
     Width = 425
     Height = 121
     Caption = 'Main window options'
@@ -153,7 +153,7 @@ object FRM_Config: TFRM_Config
   end
   object GRB_StartMenu: TGroupBox
     Left = 8
-    Top = 368
+    Top = 416
     Width = 425
     Height = 113
     Caption = 'Start Menu options'
@@ -268,7 +268,24 @@ object FRM_Config: TFRM_Config
     Caption = 'Sort KiTTY directories before KiTTY files'
     Enabled = False
     TabOrder = 12
-    OnClick = CBX_UseKiTTYSessionsClick
+  end
+  object CBX_KiTTY_Sort_Directories_Case_Insensitive: TCheckBox
+    Left = 8
+    Top = 240
+    Width = 217
+    Height = 17
+    Caption = 'Sort KiTTY directories case insensitive'
+    Enabled = False
+    TabOrder = 13
+  end
+  object CBX_KiTTY_Sort_Files_Case_Insensitive: TCheckBox
+    Left = 8
+    Top = 264
+    Width = 217
+    Height = 17
+    Caption = 'Sort KiTTY files case insensitive'
+    Enabled = False
+    TabOrder = 14
   end
   object DLG_OpenPutty: TOpenDialog
     FileName = 'putty.exe'

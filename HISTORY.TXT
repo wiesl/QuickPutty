@@ -1,3 +1,8 @@
+2013/05/13 : v1.1.8
++ Added sorting of sessions from file system (KiTTY), necessary when filesystem doesn't do the sorting (e.g. encfs)
+ + Added ability to sort directories case insensitive or case sensitive
+ + Added ability to sort files case insensitive or case sensitive
+
 2013/05/07 : v1.1.7
 + System wide hotkey is now configurable via INI file
 + Added support for KiTTY directory structure and KiTTY calls for fully portable configuration
