@@ -24,7 +24,7 @@ object FRM_Main: TFRM_Main
     Left = 0
     Top = 0
     Width = 115
-    Height = 82
+    Height = 89
     Align = alClient
     ItemHeight = 13
     TabOrder = 0
@@ -44,8 +44,14 @@ object FRM_Main: TFRM_Main
     object Update1: TMenuItem
       Action = ACT_PopulateHostList
     end
+    object N3: TMenuItem
+      Caption = '-'
+    end
     object Configuration1: TMenuItem
       Action = ACT_Config
+    end
+    object SaveConfig1: TMenuItem
+      Action = ACT_SaveConfig
     end
     object N1: TMenuItem
       Caption = '-'
@@ -88,6 +94,10 @@ object FRM_Main: TFRM_Main
     object ACT_Exit: TAction
       Caption = 'Exit'
       OnExecute = ACT_ExitExecute
+    end
+    object ACT_SaveConfig: TAction
+      Caption = 'Save Config'
+      OnExecute = ACT_SaveConfigExecute
     end
   end
 end

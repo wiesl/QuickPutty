@@ -17,11 +17,15 @@ type
     BTN_Ok: TButton;
     TRB_Transparency: TTrackBar;
     Label3: TLabel;
+    CBX_UseTransparency: TCheckBox;
+    CBX_AlwayOnTop: TCheckBox;
     procedure Button1Click(Sender: TObject);
     procedure BTN_OkClick(Sender: TObject);
     procedure BTN_CancelClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure TRB_TransparencyChange(Sender: TObject);
+    procedure CBX_UseTransparencyClick(Sender: TObject);
+    procedure CBX_AlwayOnTopClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -61,11 +65,25 @@ procedure TFRM_Config.FormShow(Sender: TObject);
 begin
   EDT_PuttyPath.Text:=FRM_Main.PuttyPath;
   TRB_Transparency.Position:=FRM_Main.AlphaBlendValue;
+  CBX_UseTransparency.Checked:=FRM_Main.AlphaBlend;
+  CBX_AlwayOnTop.Checked:=(FRM_Main.FormStyle=fsStayOnTop);
 end;
 
 procedure TFRM_Config.TRB_TransparencyChange(Sender: TObject);
 begin
   FRM_Main.AlphaBlendValue:=TRB_Transparency.Position;
+end;
+
+procedure TFRM_Config.CBX_UseTransparencyClick(Sender: TObject);
+begin
+  FRM_Main.AlphaBlend:=CBX_UseTransparency.Checked;
+end;
+
+procedure TFRM_Config.CBX_AlwayOnTopClick(Sender: TObject);
+begin
+  if CBX_AlwayOnTop.Checked
+  then FRM_Main.FormStyle:=fsStayOnTop
+  else FRM_Main.FormStyle:=fsNormal;
 end;
 
 end.

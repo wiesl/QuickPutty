@@ -4,12 +4,12 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ComCtrls, Menus, ActnList, StdCtrls, ShellAPI, ExtCtrls;
+  Dialogs, ComCtrls, Menus, ActnList, StdCtrls, ShellAPI, ExtCtrls, BomeOneInstance;
 
 const
   CRLF=#10;
   kApplicationName='QuickPutty';
-  kVersion = 'v1.1.2';
+  kVersion = 'v1.1.3';
   kFullApplicationName=kApplicationName+' '+kVersion;
   kCopyright = '(c)2001-2002 Olivier DECKMYN, olivier@deckmyn.org';
   kLicense= 'This software complies to LGPL license, see http://www.gnu.org/licenses/lgpl.txt';
@@ -44,6 +44,9 @@ type
     MNI_Sessions: TMenuItem;
     FakeMenu: TMenuItem;
     ACT_Exit: TAction;
+    ACT_SaveConfig: TAction;
+    SaveConfig1: TMenuItem;
+    N3: TMenuItem;
     procedure Exit1Click(Sender: TObject);
     procedure ACT_PopulateHostListExecute(Sender: TObject);
     procedure LSV_HostsDblClick(Sender: TObject);
@@ -56,10 +59,12 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure HotKeyActivate(var Msg: TWMHotKey); message WM_HOTKEY;
     procedure LSV_HostsKeyPress(Sender: TObject; var Key: Char);
+    procedure ACT_SaveConfigExecute(Sender: TObject);
   private
     { Private declarations }
     procedure WMMyTrayIconCallback(var Msg:TMessage); message WM_MYTRAYICONCALLBACK;
   protected
+    OneInstance : TOneInstance;
     procedure WndProc(var Msg : TMessage); override;
     procedure WMActivate(var msg:TMessage);message WM_ACTIVATE;
     procedure SwitchVisible;
@@ -192,6 +197,8 @@ begin
     ini.WriteBool(kSectionName, 'visible', Visible);
     ini.WriteString(kSectionName, 'PuttyPath', PuttyPath);
     ini.WriteInteger(kSectionName, 'alpha', AlphaBlendValue);
+    ini.WriteBool(kSectionName, 'usealpha', AlphaBlend);
+    ini.WriteBool(kSectionName, 'alwaysontop', (FormStyle=fsStayOnTop));
   finally
     ini.Free;
   end;
@@ -200,7 +207,9 @@ end;
 procedure TFRM_Main.ReadConfig();
 var
   ini : TIniFile;
+  lBool : Boolean;
 begin
+  lBool:=True;
   ini := TIniFile.Create(GetIniFileName);
   try
     Width:=ini.ReadInteger(kSectionName, 'width', Width);
@@ -209,8 +218,11 @@ begin
     Top:=ini.ReadInteger(kSectionName, 'top', Top);
     try
       Visible:=ini.ReadBool(kSectionName, 'visible', Visible);
+      AlphaBlend:=ini.ReadBool(kSectionName, 'usealpha', AlphaBlend);
+      lBool:=ini.ReadBool(kSectionName, 'alwaysontop', True);
     except
     end;
+    if lBool then FormStyle:=fsStayOnTop else FormStyle:=fsNormal;
     PuttyPath:=ini.ReadString(kSectionName, 'PuttyPath', PuttyPath);
     AlphaBlendValue:=ini.ReadInteger(kSectionName, 'alpha', AlphaBlendValue);
   finally
@@ -248,6 +260,8 @@ end;
 
 procedure TFRM_Main.FormCreate(Sender: TObject);
 begin
+  OneInstance:=TOneInstance.Create(self);
+  OneInstance.Init;
   // Handle TaskBar removal
   SetWindowLong(Application.Handle, GWL_EXSTYLE,
                 GetWindowLong(Application.Handle, GWL_EXSTYLE) or
@@ -350,6 +364,11 @@ begin
   if LSV_Hosts.ItemIndex<>-1 then OpenSession(LSV_Hosts.Items[LSV_Hosts.ItemIndex]);
 end;
 
+
+procedure TFRM_Main.ACT_SaveConfigExecute(Sender: TObject);
+begin
+  WriteConfig;
+end;
 
 end.
 

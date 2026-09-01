@@ -7,3 +7,10 @@
 2002/04/05 : v1.1.2
 + Added ALT-Q system-wide hotkey to show/hide window
 + Open sessions when pressing "Enter" key
+
+2002/08/07 : v1.1.3
++ Added "Always on top" checkbox in configuration screen
++ Added "Use Transparency" checkbox in configuration screen
++ Added "Save config" in menu in order to save configuration file immediatly (on my box, when users shuts down the computer, the .ini was not saved...don't ask me why !!!)
++ Only one instance of QuickPutty can be launch. A second launch raises the first window.
+

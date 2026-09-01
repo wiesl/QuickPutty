@@ -1,8 +1,8 @@
 object FRM_Config: TFRM_Config
-  Left = 664
-  Top = 408
+  Left = 652
+  Top = 126
   Width = 465
-  Height = 255
+  Height = 246
   Caption = 'Configuration'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -18,11 +18,9 @@ object FRM_Config: TFRM_Config
   object Label1: TLabel
     Left = 8
     Top = 200
-    Width = 373
+    Width = 305
     Height = 13
-    Caption = 
-      'QuickPutty is LGPL software, (c) Olivier DECKMYN 2001, olivier@d' +
-      'eckmyn.org'
+    Caption = 'See Help Screen for more informations (press F1 on main screen)'
   end
   object Label2: TLabel
     Left = 8
@@ -39,14 +37,14 @@ object FRM_Config: TFRM_Config
   end
   object Label3: TLabel
     Left = 16
-    Top = 96
+    Top = 112
     Width = 137
     Height = 13
     Caption = 'Transparency (Win2000, XP)'
   end
   object EDT_PuttyPath: TLabeledEdit
     Left = 16
-    Top = 56
+    Top = 72
     Width = 369
     Height = 21
     EditLabel.Width = 68
@@ -58,7 +56,7 @@ object FRM_Config: TFRM_Config
   end
   object Button1: TButton
     Left = 392
-    Top = 56
+    Top = 72
     Width = 46
     Height = 23
     Caption = '&Browse'
@@ -85,10 +83,10 @@ object FRM_Config: TFRM_Config
     OnClick = BTN_OkClick
   end
   object TRB_Transparency: TTrackBar
-    Left = 16
-    Top = 112
+    Left = 136
+    Top = 128
     Width = 281
-    Height = 45
+    Height = 33
     Max = 255
     Orientation = trHorizontal
     Frequency = 10
@@ -99,6 +97,28 @@ object FRM_Config: TFRM_Config
     TickMarks = tmBottomRight
     TickStyle = tsAuto
     OnChange = TRB_TransparencyChange
+  end
+  object CBX_UseTransparency: TCheckBox
+    Left = 16
+    Top = 136
+    Width = 105
+    Height = 17
+    Caption = 'Use Transparency'
+    Checked = True
+    State = cbChecked
+    TabOrder = 5
+    OnClick = CBX_UseTransparencyClick
+  end
+  object CBX_AlwayOnTop: TCheckBox
+    Left = 16
+    Top = 32
+    Width = 97
+    Height = 17
+    Caption = 'Always on top'
+    Checked = True
+    State = cbChecked
+    TabOrder = 6
+    OnClick = CBX_AlwayOnTopClick
   end
   object DLG_OpenPutty: TOpenDialog
     FileName = 'putty.exe'
