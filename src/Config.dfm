@@ -1,6 +1,6 @@
 object FRM_Config: TFRM_Config
-  Left = 652
-  Top = 126
+  Left = 285
+  Top = 207
   Width = 465
   Height = 246
   Caption = 'Configuration'
@@ -50,8 +50,6 @@ object FRM_Config: TFRM_Config
     EditLabel.Width = 68
     EditLabel.Height = 13
     EditLabel.Caption = 'Putty.exe path'
-    LabelPosition = lpAbove
-    LabelSpacing = 3
     TabOrder = 0
   end
   object Button1: TButton
@@ -88,14 +86,8 @@ object FRM_Config: TFRM_Config
     Width = 281
     Height = 33
     Max = 255
-    Orientation = trHorizontal
     Frequency = 10
-    Position = 0
-    SelEnd = 0
-    SelStart = 0
     TabOrder = 4
-    TickMarks = tmBottomRight
-    TickStyle = tsAuto
     OnChange = TRB_TransparencyChange
   end
   object CBX_UseTransparency: TCheckBox
@@ -119,6 +111,15 @@ object FRM_Config: TFRM_Config
     State = cbChecked
     TabOrder = 6
     OnClick = CBX_AlwayOnTopClick
+  end
+  object CBX_SystemWideHotkey: TCheckBox
+    Left = 16
+    Top = 168
+    Width = 273
+    Height = 17
+    Caption = 'System-wide hotkey (ALT-Q)  (effective on restart)'
+    TabOrder = 7
+    OnClick = CBX_SystemWideHotkeyClick
   end
   object DLG_OpenPutty: TOpenDialog
     FileName = 'putty.exe'

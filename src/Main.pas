@@ -9,15 +9,16 @@ uses
 const
   CRLF=#10;
   kApplicationName='QuickPutty';
-  kVersion = 'v1.1.3';
+  kVersion = 'v1.1.5';
   kFullApplicationName=kApplicationName+' '+kVersion;
-  kCopyright = '(c)2001-2002 Olivier DECKMYN, olivier@deckmyn.org';
+  kCopyright = '(c)2001-2003 Olivier DECKMYN, olivier@deckmyn.org';
   kLicense= 'This software complies to LGPL license, see http://www.gnu.org/licenses/lgpl.txt';
   kDocumentation = 'This stupid software is only an humble help to launch the marvelous Putty application.'+CRLF+
                    'It show the list of existing sessions, stored by Putty in Registry.'+CRLF+CRLF+
                    'Usage:'+CRLF+
                    ' - Right-click for menu, '+CRLF+
                    ' - Double-click to open session, '+CRLF+
+                   ' - Ctrl-N to open a virgin/empty session, '+CRLF+
                    ' - Double-click on tray icon to show/hide sessions list'+CRLF+
                    ' - Use ALT-Q from Windows to show/hide QuickPutty'+CRLF+CRLF+
                    'Use PAgeant (see putty website) to avoid typing your password too.';
@@ -44,13 +45,17 @@ type
     MNI_Sessions: TMenuItem;
     FakeMenu: TMenuItem;
     ACT_Exit: TAction;
+    ACT_NewSession: TAction;                             //Added by Pat
     ACT_SaveConfig: TAction;
     SaveConfig1: TMenuItem;
     N3: TMenuItem;
+
     procedure Exit1Click(Sender: TObject);
     procedure ACT_PopulateHostListExecute(Sender: TObject);
     procedure LSV_HostsDblClick(Sender: TObject);
     procedure ACT_ConfigExecute(Sender: TObject);
+
+    procedure ACT_NewSessionExecute(Sender: TObject);    //Added by Pat
     procedure FormCreate(Sender: TObject);
     procedure ACT_HelpExecute(Sender: TObject);
     procedure ACT_ShowHideExecute(Sender: TObject);
@@ -74,6 +79,7 @@ type
     PuttyPath : String;
     IconData : TNotifyIconData;
     IconCount : integer;
+    SystemWideHotKey : boolean;
     procedure Populate();
     function url_unquote(s:string): string;
     procedure WriteConfig();
@@ -88,7 +94,9 @@ implementation
 
 {$R *.dfm}
 
-uses Registry, Config, IniFiles;
+uses
+  Registry, Config, IniFiles;
+
 const
   kSectionName = 'Application';
 
@@ -199,6 +207,7 @@ begin
     ini.WriteInteger(kSectionName, 'alpha', AlphaBlendValue);
     ini.WriteBool(kSectionName, 'usealpha', AlphaBlend);
     ini.WriteBool(kSectionName, 'alwaysontop', (FormStyle=fsStayOnTop));
+    ini.WriteBool(kSectionName, 'systemwidehotkey', SystemWideHotKey);
   finally
     ini.Free;
   end;
@@ -226,6 +235,7 @@ begin
     if lBool then FormStyle:=fsStayOnTop else FormStyle:=fsNormal;
     PuttyPath:=ini.ReadString(kSectionName, 'PuttyPath', PuttyPath);
     AlphaBlendValue:=ini.ReadInteger(kSectionName, 'alpha', AlphaBlendValue);
+    SystemWideHotKey:=ini.ReadBool(kSectionName, 'systemwidehotkey', True)
   finally
     ini.Free;
   end;
@@ -250,9 +260,18 @@ procedure TFRM_Main.OpenSession(name :String);
 var
   cmd : String;
 begin
-  cmd:=PuttyPath+' @'+name;
+  cmd:=PuttyPath;
+  if name<>''
+  then cmd:=cmd+' -load '+name;
   WinExec(pchar(cmd), SW_SHOWNORMAL);
 end;
+
+
+procedure TFRM_Main.ACT_NewSessionExecute(Sender: TObject);   //Added by Pat
+begin                                                         //Added by Pat
+  OpenSession('');
+end;                                                          //Added by Pat
+
 
 procedure TFRM_Main.ACT_ConfigExecute(Sender: TObject);
 begin
@@ -282,7 +301,7 @@ begin
   ReadConfig;
   Populate;
   // Set System-Wide HotKey
-  RegisterHotKey(Self.Handle,Ord('Q')-64,MOD_ALT,Ord('Q'));
+  If SystemWideHotKey then RegisterHotKey(Self.Handle,Ord('Q')-64,MOD_ALT,Ord('Q'));
 end;
 
 // Handle TaskBar Removal

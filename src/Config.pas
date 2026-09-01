@@ -19,6 +19,7 @@ type
     Label3: TLabel;
     CBX_UseTransparency: TCheckBox;
     CBX_AlwayOnTop: TCheckBox;
+    CBX_SystemWideHotkey: TCheckBox;
     procedure Button1Click(Sender: TObject);
     procedure BTN_OkClick(Sender: TObject);
     procedure BTN_CancelClick(Sender: TObject);
@@ -26,6 +27,7 @@ type
     procedure TRB_TransparencyChange(Sender: TObject);
     procedure CBX_UseTransparencyClick(Sender: TObject);
     procedure CBX_AlwayOnTopClick(Sender: TObject);
+    procedure CBX_SystemWideHotkeyClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -67,6 +69,7 @@ begin
   TRB_Transparency.Position:=FRM_Main.AlphaBlendValue;
   CBX_UseTransparency.Checked:=FRM_Main.AlphaBlend;
   CBX_AlwayOnTop.Checked:=(FRM_Main.FormStyle=fsStayOnTop);
+  CBX_SystemWideHotkey.Checked:=(FRM_Main.SystemWideHotKey);
 end;
 
 procedure TFRM_Config.TRB_TransparencyChange(Sender: TObject);
@@ -84,6 +87,11 @@ begin
   if CBX_AlwayOnTop.Checked
   then FRM_Main.FormStyle:=fsStayOnTop
   else FRM_Main.FormStyle:=fsNormal;
+end;
+
+procedure TFRM_Config.CBX_SystemWideHotkeyClick(Sender: TObject);
+begin
+  FRM_Main.SystemWideHotKey:=CBX_SystemWideHotkey.Checked;
 end;
 
 end.
