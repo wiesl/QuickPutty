@@ -1,10 +1,10 @@
 object FRM_Config: TFRM_Config
-  Left = 307
-  Top = 448
+  Left = 197
+  Top = 414
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Configuration'
-  ClientHeight = 388
+  ClientHeight = 526
   ClientWidth = 442
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -21,21 +21,21 @@ object FRM_Config: TFRM_Config
   TextHeight = 13
   object Label1: TLabel
     Left = 8
-    Top = 352
+    Top = 488
     Width = 181
     Height = 13
     Caption = 'See Help Screen for more informations'
   end
   object Label5: TLabel
     Left = 8
-    Top = 368
+    Top = 504
     Width = 121
     Height = 13
     Caption = '(press F1 on main screen)'
   end
   object BTN_Cancel: TButton
     Left = 360
-    Top = 352
+    Top = 488
     Width = 75
     Height = 25
     Cancel = True
@@ -45,7 +45,7 @@ object FRM_Config: TFRM_Config
   end
   object BTN_Ok: TButton
     Left = 280
-    Top = 352
+    Top = 488
     Width = 75
     Height = 25
     Caption = '&Ok'
@@ -67,14 +67,18 @@ object FRM_Config: TFRM_Config
     Top = 24
     Width = 369
     Height = 21
-    EditLabel.Width = 81
+    EditLabel.Width = 409
     EditLabel.Height = 13
-    EditLabel.Caption = 'Path to Putty.exe'
+    EditLabel.Caption = 
+      'Path to Putty.exe/Kitty.exe/Kitty_nocompress.exe/Kitty_notrans.e' +
+      'xe/Kitty_portable.exe'
+    LabelPosition = lpAbove
+    LabelSpacing = 3
     TabOrder = 0
   end
   object GRB_Transparency: TGroupBox
     Left = 8
-    Top = 104
+    Top = 240
     Width = 425
     Height = 121
     Caption = 'Main window options'
@@ -106,9 +110,14 @@ object FRM_Config: TFRM_Config
       Width = 297
       Height = 33
       Max = 255
+      Orientation = trHorizontal
       Frequency = 10
       Position = 255
+      SelEnd = 0
+      SelStart = 0
       TabOrder = 2
+      TickMarks = tmBottomRight
+      TickStyle = tsAuto
       OnChange = TRB_TransparencyChange
     end
     object CBX_UseTransparency: TCheckBox
@@ -144,7 +153,7 @@ object FRM_Config: TFRM_Config
   end
   object GRB_StartMenu: TGroupBox
     Left = 8
-    Top = 232
+    Top = 368
     Width = 425
     Height = 113
     Caption = 'Start Menu options'
@@ -170,7 +179,7 @@ object FRM_Config: TFRM_Config
       Top = 24
       Width = 161
       Height = 33
-      Hint = 'Create Start Menu shortcuts for PuTTY & QuickPutty'
+      Hint = 'Create Start Menu shortcuts for PuTTY/KiTTY & QuickPutty'
       Caption = 'Create Start Menu shortcuts'
       TabOrder = 0
       OnClick = BTN_CreateStartMenuClick
@@ -180,7 +189,7 @@ object FRM_Config: TFRM_Config
       Top = 24
       Width = 161
       Height = 33
-      Hint = 'Remove Start Menu shortcuts for PuTTY & QuickPutty'
+      Hint = 'Remove Start Menu shortcuts for PuTTY/KiTTY & QuickPutty'
       Caption = 'Remove Start Menu shortcuts'
       TabOrder = 1
       OnClick = BTN_RemoveStartMenuClick
@@ -197,10 +206,69 @@ object FRM_Config: TFRM_Config
   object CBX_SystemWideHotkey: TCheckBox
     Left = 8
     Top = 80
-    Width = 329
+    Width = 380
     Height = 17
-    Caption = 'Use system-wide hotkey (ALT-Q)  (effective on restart)'
+    Caption = 
+      'Use system-wide hotkey (ALT-Q, configurable in INI file)  (effec' +
+      'tive on restart)'
     TabOrder = 7
+  end
+  object CBX_UseKiTTYSessions: TCheckBox
+    Left = 8
+    Top = 104
+    Width = 177
+    Height = 17
+    Caption = 'Use KiTTY style config directory'
+    TabOrder = 8
+    OnClick = CBX_UseKiTTYSessionsClick
+  end
+  object EDT_KiTTYConfigPath: TLabeledEdit
+    Left = 8
+    Top = 144
+    Width = 369
+    Height = 21
+    EditLabel.Width = 174
+    EditLabel.Height = 13
+    EditLabel.Caption = 'Path to KiTTY configuration directory'
+    Enabled = False
+    LabelPosition = lpAbove
+    LabelSpacing = 3
+    TabOrder = 9
+  end
+  object Button2: TButton
+    Left = 387
+    Top = 144
+    Width = 46
+    Height = 23
+    Caption = '&Browse'
+    Enabled = False
+    TabOrder = 10
+    OnClick = Button2Click
+  end
+  object EDT_KiTTY_Ignore_Session_Filter: TLabeledEdit
+    Left = 8
+    Top = 184
+    Width = 369
+    Height = 21
+    EditLabel.Width = 382
+    EditLabel.Height = 13
+    EditLabel.Caption = 
+      'Ignore Session Filter substring list (e.g. substring;company1\se' +
+      'ssion1;company2\)'
+    Enabled = False
+    LabelPosition = lpAbove
+    LabelSpacing = 3
+    TabOrder = 11
+  end
+  object CBX_KiTTY_Sort_Directories_First: TCheckBox
+    Left = 8
+    Top = 216
+    Width = 217
+    Height = 17
+    Caption = 'Sort KiTTY directories before KiTTY files'
+    Enabled = False
+    TabOrder = 12
+    OnClick = CBX_UseKiTTYSessionsClick
   end
   object DLG_OpenPutty: TOpenDialog
     FileName = 'putty.exe'

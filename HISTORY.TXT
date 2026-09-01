@@ -1,3 +1,12 @@
+2013/05/07 : v1.1.7
++ System wide hotkey is now configurable via INI file
++ Added support for KiTTY directory structure and KiTTY calls for fully portable configuration
+  + Fully backward compatible with PuTTY
+  + KiTTY configuration path can be configured
+  + Directories and sessions can be filtered (e.g. old config, company/home config)
+  + Sorting of directories can be configured (session files before directories or vice versa)
++ Refactored code a little bit
+
 2004/01/15 : v1.1.6
 * Fixed "-load" bug with putty sessions name containing whitespaces
 + Redesigned Configuration dialog

@@ -9,18 +9,19 @@ uses
 const
   CRLF=#10;
   kApplicationName='QuickPutty';
-  kVersion = 'v1.1.6';
+  kVersion = 'v1.1.7';
   kFullApplicationName=kApplicationName+' '+kVersion;
-  kCopyright = '(c)2001-2003 Olivier DECKMYN, olivier@deckmyn.org';
+  kCopyright = '(c)2001-2003 Olivier DECKMYN, olivier@deckmyn.org, (c)2013 Gerhard WIESINGER, lists@wiesinger.com';
   kLicense= 'This software complies to LGPL license, see http://www.gnu.org/licenses/lgpl.txt';
-  kDocumentation = 'This stupid software is only an humble help to launch the marvelous Putty application.'+CRLF+
-                   'It show the list of existing sessions, stored by Putty in Registry.'+CRLF+CRLF+
+  kDocumentation = 'This stupid software is only an humble help to launch the marvelous Putty/KiTTY application.'+CRLF+
+                   'It shows the list of existing sessions, stored by Putty in Registry.'+CRLF+
+                   'Alternativly it shows the list of existing sessions, stored by KiTTY in the file system.'+CRLF+CRLF+
                    'Usage:'+CRLF+
                    ' - Right-click for menu, '+CRLF+
                    ' - Double-click to open session, '+CRLF+
                    ' - Ctrl-N to open a virgin/empty session, '+CRLF+
                    ' - Double-click on tray icon to show/hide sessions list'+CRLF+
-                   ' - Use ALT-Q from Windows to show/hide QuickPutty'+CRLF+CRLF+
+                   ' - Use ALT-Q (configurable in INI file) hotkey from Windows to show/hide QuickPutty'+CRLF+CRLF+
                    'Use PAgeant (see putty website) to avoid typing your password too.';
 
 const
@@ -78,6 +79,12 @@ type
     IconData : TNotifyIconData;
     IconCount : integer;
     SystemWideHotKey : boolean;
+    SystemWideHotKey_modifier : integer;
+    SystemWideHotKey_vkey : integer;
+    UseKiTTYSessions : boolean;
+    KiTTYConfigPath : String;
+    KiTTY_Ignore_Session_Filter : String;
+    KiTTY_Sort_Directories_First : boolean;
     SessionShortCuts: Boolean;
     SessionsStartMenu: Boolean;
     procedure Populate();
@@ -133,22 +140,12 @@ end;
 
 procedure TFRM_Main.Populate();
 var
-  Reg: TRegistry;
   i : integer;
   item : TMenuItem;
 begin
   // Read Registry and populate mainform on ListBox
-  Reg := TRegistry.Create;
-  try
-    Reg.RootKey := HKEY_CURRENT_USER;
-    if Reg.OpenKey('\Software\SimonTatham\PuTTY\Sessions', True) then
-   begin
-      Reg.GetKeyNames(LSV_Hosts.Items);
-      Reg.CloseKey;
-    end;
-  finally
-    Reg.Free;
-  end;
+  GetStoredSessions(UseKiTTYSessions, KiTTYConfigPath, KiTTY_Ignore_Session_Filter, KiTTY_Sort_Directories_First, LSV_Hosts.Items);
+
   // Populate menu
   MNI_Sessions.Clear;
   for i:=0 to LSV_Hosts.Items.Count-1 do
@@ -206,6 +203,12 @@ begin
     ini.WriteBool(kSectionName, 'usealpha', AlphaBlend);
     ini.WriteBool(kSectionName, 'alwaysontop', (FormStyle=fsStayOnTop));
     ini.WriteBool(kSectionName, 'systemwidehotkey', SystemWideHotKey);
+    ini.WriteInteger(kSectionName, 'systemwidehotkey_modifier', SystemWideHotKey_modifier);
+    ini.WriteInteger(kSectionName, 'systemwidehotkey_vkey', SystemWideHotKey_vkey);
+    ini.WriteBool(kSectionName, 'usekittysessions', UseKiTTYSessions);
+    ini.WriteString(kSectionName, 'KiTTYConfigPath', KiTTYConfigPath);
+    ini.WriteString(kSectionName, 'KiTTYIgnoreSessionFilter', KiTTY_Ignore_Session_Filter);
+    ini.WriteBool(kSectionName, 'KiTTYSortDirectoriesFirst', KiTTY_Sort_Directories_First);
     ini.WriteBool(kSectionName, 'session_shortcuts', SessionShortCuts);
     ini.WriteBool(kSectionName, 'sessions_startmenu', SessionsStartMenu);
   finally
@@ -236,6 +239,13 @@ begin
     PuttyPath:=ini.ReadString(kSectionName, 'PuttyPath', PuttyPath);
     AlphaBlendValue:=ini.ReadInteger(kSectionName, 'alpha', AlphaBlendValue);
     SystemWideHotKey:=ini.ReadBool(kSectionName, 'systemwidehotkey', True);
+    { Default system wide hot key: Alt-Q for backward compatibility}
+    SystemWideHotKey_modifier:=ini.ReadInteger(kSectionName, 'systemwidehotkey_modifier', MOD_ALT);
+    SystemWideHotKey_vkey:=ini.ReadInteger(kSectionName, 'systemwidehotkey_vkey', Ord('Q'));
+    UseKiTTYSessions:=ini.ReadBool(kSectionName, 'usekittysessions', False);
+    KiTTYConfigPath:=ini.ReadString(kSectionName, 'KiTTYConfigPath', KiTTYConfigPath);
+    KiTTY_Ignore_Session_Filter:=ini.ReadString(kSectionName, 'KiTTYIgnoreSessionFilter', KiTTY_Ignore_Session_Filter);
+    KiTTY_Sort_Directories_First:=ini.ReadBool(kSectionName, 'KiTTYSortDirectoriesFirst', False);
     SessionShortCuts := ini.ReadBool(kSectionName, 'session_shortcuts', False);
     SessionsStartMenu := ini.ReadBool(kSectionName, 'sessions_startmenu', False);
   finally
@@ -259,13 +269,8 @@ begin
 end;
 
 procedure TFRM_Main.OpenSession(name :String);
-var
-  cmd : String;
 begin
-  cmd:=PuttyPath;
-  If name <> '' Then
-    cmd := cmd +' -load "'+name+'"';
-  WinExec(pchar(cmd), SW_SHOWNORMAL);
+  WinExec(pchar(GetCommandForSession(PuttyPath, name)), SW_SHOWNORMAL);
 end;
 
 procedure TFRM_Main.ACT_ConfigExecute(Sender: TObject);
@@ -297,7 +302,7 @@ begin
   Populate;
   // Set System-Wide HotKey
   if SystemWideHotKey Then
-    RegisterHotKey(Self.Handle,Ord('Q')-64,MOD_ALT,Ord('Q'));
+    RegisterHotKey(Self.Handle,Ord('Q')-64,SystemWideHotKey_modifier,SystemWideHotKey_vkey);
 end;
 
 // Handle TaskBar Removal

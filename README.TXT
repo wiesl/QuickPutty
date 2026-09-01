@@ -1,7 +1,7 @@
-QuickPutty v1.1.6
+QuickPutty v1.1.7
 ---
 
-This is a stupid application that allows to quickly launch a putty session.
+This is a stupid application that allows to quickly launch a putty/KiTTY session.
 
 Usage : Launch and Play : Double Click, Right Click ...
 
@@ -11,6 +11,7 @@ This application is made with Delphi6 Personnal (free) edition. Feel free to mod
 ---
 
 (c)2001 Olivier DECKMYN, LGPL License.
+(c)2013 Gerhard WIESINGER, LGPL License.
 
 
 
