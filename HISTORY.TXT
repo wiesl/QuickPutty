@@ -2,6 +2,8 @@
 * Release for github at https://github.com/wiesl/QuickPutty
 * Fixed typo.
 * Updated copyright years
+* Added release scripts
+* Added Lazarus-IDE and FPC (Free Pascal Compiler compatibility), still buggy.
 
 2015/06/23 : v1.1.10
 + Added ability for multikey searches, optionally with substring configuration: So just type the session name and the session will be found
