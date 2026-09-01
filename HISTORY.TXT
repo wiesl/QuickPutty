@@ -1,3 +1,6 @@
+2013/10/15 : v1.1.9
++ Added ability for multikey search: So just type the session name and the session will be found
+
 2013/05/13 : v1.1.8
 + Added sorting of sessions from file system (KiTTY), necessary when filesystem doesn't do the sorting (e.g. encfs)
  + Added ability to sort directories case insensitive or case sensitive

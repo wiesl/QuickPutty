@@ -105,4 +105,8 @@ object FRM_Main: TFRM_Main
       OnExecute = ACT_SaveConfigExecute
     end
   end
+  object KeyTimer: TTimer
+    Enabled = False
+    OnTimer = DoKeyTimer
+  end
 end

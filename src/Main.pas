@@ -9,7 +9,7 @@ uses
 const
   CRLF=#10;
   kApplicationName='QuickPutty';
-  kVersion = 'v1.1.8';
+  kVersion = 'v1.1.9';
   kFullApplicationName=kApplicationName+' '+kVersion;
   kCopyright = '(c)2001-2003 Olivier DECKMYN, olivier@deckmyn.org, (c)2013 Gerhard WIESINGER, lists@wiesinger.com';
   kLicense= 'This software complies to LGPL license, see http://www.gnu.org/licenses/lgpl.txt';
@@ -50,6 +50,7 @@ type
     SaveConfig1: TMenuItem;
     N3: TMenuItem;
     NewSession1: TMenuItem;
+    KeyTimer: TTimer;
     procedure Exit1Click(Sender: TObject);
     procedure ACT_PopulateHostListExecute(Sender: TObject);
     procedure LSV_HostsDblClick(Sender: TObject);
@@ -64,6 +65,13 @@ type
     procedure LSV_HostsKeyPress(Sender: TObject; var Key: Char);
     procedure ACT_SaveConfigExecute(Sender: TObject);
     procedure NewSession1Click(Sender: TObject);
+    procedure UpdateKeyString(var Key: Char);
+    procedure SearchAndSetListItem();
+    procedure UpdateCaption();
+    procedure ClearSearchAndCaption();
+    procedure DoKeyTimer(Sender: TObject);
+    procedure KeyTimerDisable();
+    procedure KeyTimerEnable();
   private
     { Private declarations }
     procedure WMMyTrayIconCallback(var Msg:TMessage); message WM_MYTRAYICONCALLBACK;
@@ -89,6 +97,9 @@ type
     KiTTY_Sort_Files_Case_Insensitive : boolean;
     SessionShortCuts: Boolean;
     SessionsStartMenu: Boolean;
+    LastKeyString: String;
+    SearchKeyTimeout: Integer;
+    SearchKeyOnlySessionName: Boolean;
     procedure Populate();
     function url_unquote(s:string): string;
     procedure WriteConfig();
@@ -215,6 +226,8 @@ begin
     ini.WriteBool(kSectionName, 'KiTTYSortFilesCaseInsensitive', KiTTY_Sort_Files_Case_Insensitive);
     ini.WriteBool(kSectionName, 'session_shortcuts', SessionShortCuts);
     ini.WriteBool(kSectionName, 'sessions_startmenu', SessionsStartMenu);
+    ini.WriteInteger(kSectionName, 'searchkeytimeout', SearchKeyTimeout);
+    ini.WriteBool(kSectionName, 'searchkeyonlysessionname', SearchKeyOnlySessionName);
   finally
     ini.Free;
   end;
@@ -254,6 +267,8 @@ begin
     KiTTY_Sort_Files_Case_Insensitive:=ini.ReadBool(kSectionName, 'KiTTYSortFilesCaseInsensitive', False);
     SessionShortCuts := ini.ReadBool(kSectionName, 'session_shortcuts', False);
     SessionsStartMenu := ini.ReadBool(kSectionName, 'sessions_startmenu', False);
+    SearchKeyTimeout :=  ini.ReadInteger(kSectionName, 'searchkeytimeout', 3000);
+    SearchKeyOnlySessionName := ini.ReadBool(kSectionName, 'searchkeyonlysessionname', True);
   finally
     ini.Free;
   end;
@@ -306,6 +321,8 @@ begin
   // Read Config and Populate list
   ReadConfig;
   Populate;
+  LastKeyString := '';
+
   // Set System-Wide HotKey
   if SystemWideHotKey Then
     RegisterHotKey(Self.Handle,Ord('Q')-64,SystemWideHotKey_modifier,SystemWideHotKey_vkey);
@@ -382,9 +399,115 @@ begin
   SwitchVisible;
 end;
 
+{
+function DateTimeToUnix(DateTime: TDateTime): Int64;
+begin
+  Result := Round((DateTime - 25569) * SecsPerDay);
+end;
+}
+
+procedure TFRM_Main.DoKeyTimer(Sender: TObject);
+begin
+  KeyTimerDisable();
+  { Clear search and caption }
+  ClearSearchAndCaption();
+end;
+
+procedure TFRM_Main.KeyTimerDisable();
+begin
+  KeyTimer.Enabled := False;
+end;
+
+procedure TFRM_Main.KeyTimerEnable();
+begin
+  with KeyTimer do
+  begin
+    Interval := SearchKeyTimeout;
+    Enabled := True;
+  end;
+end;
+
+procedure TFRM_Main.UpdateKeyString(var Key: Char);
+begin
+  if Key = #8 then
+    { Delete Key}
+    LastKeyString := Copy(LastKeyString, 1, Length(LastKeyString) - 1)
+  else
+    LastKeyString := LastKeyString + Key;
+end;
+
+function GetHostName(FullPathAndName: String): String;
+var
+  position: Integer;
+begin
+  while Pos('\', FullPathAndName) > 0 do
+  begin
+    position := Pos('\', FullPathAndName);
+    FullPathAndName := Copy(FullPathAndName, position + 1, Length(FullPathAndName));
+  end;
+  Result := FullPathAndName;
+end;
+
+procedure TFRM_Main.SearchAndSetListItem();
+var
+  i : Integer;
+  HostString: String;
+begin
+  if LastKeyString <> '' then
+  begin
+    for i := 0 to LSV_Hosts.items.count - 1 do
+    begin
+      HostString := LSV_Hosts.items[i];
+      if SearchKeyOnlySessionName = True then HostString:= GetHostName(HostString);
+
+      HostString := Copy(HostString, 1, Length(LastKeyString));
+      if LowerCase(LastKeyString) = LowerCase(HostString) then
+      begin
+        LSV_Hosts.itemindex := i;
+        break;
+      end;
+    end;
+  end;
+end;
+
+procedure TFRM_Main.UpdateCaption();
+begin
+  if LastKeyString = '' then
+    Caption := 'QuickPutty'
+  else
+    Caption := 'QuickPutty [' + LastKeyString + ']';
+end;
+
+procedure TFRM_Main.ClearSearchAndCaption();
+begin
+  LastKeyString := '';
+  UpdateCaption();
+end;
+
 procedure TFRM_Main.LSV_HostsKeyPress(Sender: TObject; var Key: Char);
 begin
-  if Key=#13 then OpenSelectedSession;
+  { Disable Timer for retrigger and to avoid race conditions }
+  KeyTimerDisable();
+
+  if Key=#13 then
+  begin
+    ClearSearchAndCaption();
+    OpenSelectedSession
+  end
+  else
+  begin
+    UpdateKeyString(Key);
+    SearchAndSetListItem();
+    UpdateCaption();
+
+    { Enable the timer here }
+    KeyTimerEnable();
+
+    { No further event handling }
+    Key := #0;
+
+    { Old code: Keys := '' + IntToStr(DateTimeToUnix(Now())) + ' ' + LastKeyString; }
+  end;
 end;
 
 procedure TFRM_Main.OpenSelectedSession;
