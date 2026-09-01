@@ -62,7 +62,9 @@ type
     procedure FakeMenuClick(Sender: TObject);
     procedure ACT_ExitExecute(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+{$IFnDEF FPC}
     procedure HotKeyActivate(var Msg: TWMHotKey); message WM_HOTKEY;
+{$ENDIF}
     procedure LSV_HostsKeyPress(Sender: TObject; var Key: Char);
     procedure ACT_SaveConfigExecute(Sender: TObject);
     procedure NewSession1Click(Sender: TObject);
@@ -130,6 +132,12 @@ var
   p : TPoint;
 begin
   case Msg.Msg of
+{$IFDEF FPC}
+    WM_HOTKEY:
+      begin
+        SwitchVisible;
+      end;
+{$ENDIF}
     WM_USER + 1:
     case Msg.lParam of
       WM_RBUTTONDOWN: begin
@@ -315,17 +323,29 @@ begin
   BorderIcons := [biSystemMenu];
   IconCount := 0;
   IconData.cbSize := sizeof(IconData);
+{$IFnDEF FPC}
   IconData.Wnd := Handle;
+{$ELSE}
+  IconData.hWnd := Handle;
+{$ENDIF}
   IconData.uID := 100;
   IconData.uFlags := NIF_MESSAGE + NIF_ICON + NIF_TIP;
   IconData.uCallBackMessage := WM_MYTRAYICONCALLBACK;
   IconData.hIcon := Application.Icon.Handle;
   StrPCopy(IconData.szTip, Application.Title);
+{$IFnDEF FPC}
   Shell_NotifyIcon(NIM_ADD, @IconData);
+{$ELSE}
+  Shell_NotifyIconA(NIM_ADD, @IconData);
+{$ENDIF}
   // Read Config and Populate list
   ReadConfig;
   Populate;
   LastKeyString := '';
+
+{$IFnDEF FPC}
+  PopupMenu1.AutoHotkeys := maManual;
+{$ENDIF}
 
   // Set System-Wide HotKey
   if SystemWideHotKey Then
@@ -369,7 +389,11 @@ end;
 procedure TFRM_Main.ACT_ExitExecute(Sender: TObject);
 begin
   WriteConfig;
+{$IFnDEF FPC}
   Shell_NotifyIcon(NIM_DELETE, @IconData);   // Remove Tray Icon
+{$ELSE}
+  Shell_NotifyIconA(NIM_DELETE, @IconData);   // Remove Tray Icon
+{$ENDIF}
   Application.ProcessMessages;
   Application.Terminate; // Kill Application
 end;
@@ -397,11 +421,12 @@ begin
   end;
 end;
 
-
+{$IFnDEF FPC}
 procedure TFRM_Main.HotKeyActivate(var Msg: TWMHotKey);
 begin
   SwitchVisible;
 end;
+{$ENDIF}
 
 {
 function DateTimeToUnix(DateTime: TDateTime): Int64;

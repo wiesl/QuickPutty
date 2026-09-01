@@ -32,7 +32,6 @@ object FRM_Main: TFRM_Main
     OnKeyPress = LSV_HostsKeyPress
   end
   object PopupMenu1: TPopupMenu
-    AutoHotkeys = maManual
     Left = 48
     Top = 8
     object MNI_Sessions: TMenuItem

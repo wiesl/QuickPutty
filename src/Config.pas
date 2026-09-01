@@ -402,9 +402,13 @@ var Dir:String;
 begin
   Dir:=EDT_KiTTYConfigPath.Text;
   if Dir='' then Dir:='C:\Program Files';
-
+{$IFnDEF FPC}
   if FileCtrl.SelectDirectory(Dir, [sdAllowCreate, sdPerformCreate, sdPrompt], 1000) then
     EDT_KiTTYConfigPath.Text:=Dir;
+{$ELSE}
+  if SelectDirectory(Dir, [sdAllowCreate, sdPerformCreate, sdPrompt], 1000) then
+    EDT_KiTTYConfigPath.Text:=Dir;
+{$ENDIF}
 end;
 
 procedure TFRM_Config.BTN_OkClick(Sender: TObject);
