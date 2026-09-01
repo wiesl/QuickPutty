@@ -10,7 +10,7 @@ uses
 const
   CRLF=#10;
   kApplicationName='QuickPutty';
-  kVersion = 'v1.1.10';
+  kVersion = 'v1.1.11';
   kFullApplicationName=kApplicationName+' '+kVersion;
   kCopyright = '(c)2001-2003 Olivier DECKMYN, olivier@deckmyn.org, (c)2013-2015 Gerhard WIESINGER, lists@wiesinger.com';
   kLicense= 'This software complies to LGPL license, see http://www.gnu.org/licenses/lgpl.txt';
@@ -23,7 +23,7 @@ const
                    ' - Ctrl-N to open a virgin/empty session, '+CRLF+
                    ' - Double-click on tray icon to show/hide sessions list'+CRLF+
                    ' - Use ALT-Q (configurable in INI file) hotkey from Windows to show/hide QuickPutty'+CRLF+CRLF+
-                   'Use PAgeant (see putty website) to avoid typing your password too.';
+                   'Use Pageant (see putty website) to avoid typing your password too.';
 
 const
   WM_MYTRAYICONCALLBACK = WM_USER + 1;

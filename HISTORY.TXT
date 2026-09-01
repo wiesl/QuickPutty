@@ -1,3 +1,8 @@
+2026/09/01 : v1.1.11
+* Release for github at https://github.com/wiesl/QuickPutty
+* Fixed typo.
+* Updated copyright years
+
 2015/06/23 : v1.1.10
 + Added ability for multikey searches, optionally with substring configuration: So just type the session name and the session will be found
 * Configuration of "Made Search Key Only in Session Name" feature is also configurable via configuration dialog
