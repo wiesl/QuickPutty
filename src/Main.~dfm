@@ -1,6 +1,6 @@
 object FRM_Main: TFRM_Main
-  Left = 1086
-  Top = 116
+  Left = 844
+  Top = 105
   Width = 123
   Height = 116
   AlphaBlend = True
@@ -29,6 +29,7 @@ object FRM_Main: TFRM_Main
     ItemHeight = 13
     TabOrder = 0
     OnDblClick = LSV_HostsDblClick
+    OnKeyPress = LSV_HostsKeyPress
   end
   object PopupMenu1: TPopupMenu
     AutoHotkeys = maManual

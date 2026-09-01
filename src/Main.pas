@@ -9,16 +9,17 @@ uses
 const
   CRLF=#10;
   kApplicationName='QuickPutty';
-  kVersion = 'v1.1.1';
+  kVersion = 'v1.1.2';
   kFullApplicationName=kApplicationName+' '+kVersion;
-  kCopyright = '(c)2001 Olivier DECKMYN, olivier@deckmyn.org';
+  kCopyright = '(c)2001-2002 Olivier DECKMYN, olivier@deckmyn.org';
   kLicense= 'This software complies to LGPL license, see http://www.gnu.org/licenses/lgpl.txt';
   kDocumentation = 'This stupid software is only an humble help to launch the marvelous Putty application.'+CRLF+
                    'It show the list of existing sessions, stored by Putty in Registry.'+CRLF+CRLF+
                    'Usage:'+CRLF+
                    ' - Right-click for menu, '+CRLF+
                    ' - Double-click to open session, '+CRLF+
-                   ' - Double-click on tray icon to show/hide sessions list'+CRLF+CRLF+
+                   ' - Double-click on tray icon to show/hide sessions list'+CRLF+
+                   ' - Use ALT-Q from Windows to show/hide QuickPutty'+CRLF+CRLF+
                    'Use PAgeant (see putty website) to avoid typing your password too.';
 
 const
@@ -53,12 +54,16 @@ type
     procedure FakeMenuClick(Sender: TObject);
     procedure ACT_ExitExecute(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure HotKeyActivate(var Msg: TWMHotKey); message WM_HOTKEY;
+    procedure LSV_HostsKeyPress(Sender: TObject; var Key: Char);
   private
     { Private declarations }
     procedure WMMyTrayIconCallback(var Msg:TMessage); message WM_MYTRAYICONCALLBACK;
   protected
     procedure WndProc(var Msg : TMessage); override;
     procedure WMActivate(var msg:TMessage);message WM_ACTIVATE;
+    procedure SwitchVisible;
+    procedure OpenSelectedSession;
   public
     { Public declarations }
     PuttyPath : String;
@@ -110,14 +115,7 @@ begin
   case Msg.lParam of
     WM_LBUTTONDBLCLK  :
       begin
-        { reverse visibility state }
-        Visible := not Visible;
-
-        { set showing of mainform to visibility state }
-        Application.ShowMainForm := Visible;
-
-//        { set application to foreground }
-//        SetForegroundWindow(Application.Handle);
+        SwitchVisible;
       end;
   end;
 end;
@@ -232,7 +230,7 @@ end;
 
 procedure TFRM_Main.LSV_HostsDblClick(Sender: TObject);
 begin
-  OpenSession(LSV_Hosts.Items[LSV_Hosts.ItemIndex]);
+  OpenSelectedSession;
 end;
 
 procedure TFRM_Main.OpenSession(name :String);
@@ -261,7 +259,6 @@ begin
   IconData.Wnd := Handle;
   IconData.uID := 100;
   IconData.uFlags := NIF_MESSAGE + NIF_ICON + NIF_TIP;
-//  IconData.uCallbackMessage := WM_USER + 1;
   IconData.uCallBackMessage := WM_MYTRAYICONCALLBACK;
   IconData.hIcon := Application.Icon.Handle;
   StrPCopy(IconData.szTip, Application.Title);
@@ -269,6 +266,8 @@ begin
   // Read Config and Populate list
   ReadConfig;
   Populate;
+  // Set System-Wide HotKey
+  RegisterHotKey(Self.Handle,Ord('Q')-64,MOD_ALT,Ord('Q'));
 end;
 
 // Handle TaskBar Removal
@@ -318,6 +317,39 @@ begin
   Visible:=False;
   Action:=caNone;
 end;
+
+procedure TFRM_Main.SwitchVisible;
+begin
+  { reverse visibility state }
+  Visible := not Visible;
+
+  { set showing of mainform to visibility state }
+  Application.ShowMainForm := Visible;
+
+  If Visible then
+  begin
+    SetFocus;
+    LSV_Hosts.SetFocus;
+    ActiveControl:=LSV_Hosts;
+  end;
+end;
+
+
+procedure TFRM_Main.HotKeyActivate(var Msg: TWMHotKey);
+begin
+  SwitchVisible;
+end;
+
+procedure TFRM_Main.LSV_HostsKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key=#13 then OpenSelectedSession;
+end;
+
+procedure TFRM_Main.OpenSelectedSession;
+begin
+  if LSV_Hosts.ItemIndex<>-1 then OpenSession(LSV_Hosts.Items[LSV_Hosts.ItemIndex]);
+end;
+
 
 end.
 
