@@ -1,0 +1,25 @@
+# --- Ignore Delphi compiled unit files inside the src directory ---
+src/*.dcu
+# --- Ignore Lazarus-IDE and FPC (Free Pascal Compiler) generated files ---
+bin/*.compiled
+bin/*.dfm
+bin/*.o
+bin/*.obj
+bin/*.ppu
+bin/*.res
+# --- Lazarus local / user-specific settings ---
+src/*.lps
+src/lazarus.cfg
+# --- Backups and temp directories ---
+src/backup/
+src/lib/
+src/units/
+src/*.bak
+src/*.lfm.bak
+src/*.lpi.bak
+src/.~*
+src/.*$
+src/QuickPutty-diff.bat
+src/*.diff
+# --- Generate release files ---
+*.zip
