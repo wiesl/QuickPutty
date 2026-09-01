@@ -1,3 +1,7 @@
+2015/06/23 : v1.1.10
++ Added ability for multikey searches, optionally with substring configuration: So just type the session name and the session will be found
+* Configuration of "Made Search Key Only in Session Name" feature is also configurable via configuration dialog
+
 2013/10/15 : v1.1.9
 + Added ability for multikey search: So just type the session name and the session will be found
 

@@ -3,15 +3,16 @@ unit Main;
 interface
 
 uses
+  Strutils,
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ComCtrls, Menus, ActnList, StdCtrls, ShellAPI, ExtCtrls, BomeOneInstance;
 
 const
   CRLF=#10;
   kApplicationName='QuickPutty';
-  kVersion = 'v1.1.9';
+  kVersion = 'v1.1.10';
   kFullApplicationName=kApplicationName+' '+kVersion;
-  kCopyright = '(c)2001-2003 Olivier DECKMYN, olivier@deckmyn.org, (c)2013 Gerhard WIESINGER, lists@wiesinger.com';
+  kCopyright = '(c)2001-2003 Olivier DECKMYN, olivier@deckmyn.org, (c)2013-2015 Gerhard WIESINGER, lists@wiesinger.com';
   kLicense= 'This software complies to LGPL license, see http://www.gnu.org/licenses/lgpl.txt';
   kDocumentation = 'This stupid software is only an humble help to launch the marvelous Putty/KiTTY application.'+CRLF+
                    'It shows the list of existing sessions, stored by Putty in Registry.'+CRLF+
@@ -90,6 +91,7 @@ type
     SystemWideHotKey_modifier : integer;
     SystemWideHotKey_vkey : integer;
     UseKiTTYSessions : boolean;
+    Search_For_Substrings : boolean;
     KiTTYConfigPath : String;
     KiTTY_Ignore_Session_Filter : String;
     KiTTY_Sort_Directories_First : boolean;
@@ -228,6 +230,7 @@ begin
     ini.WriteBool(kSectionName, 'sessions_startmenu', SessionsStartMenu);
     ini.WriteInteger(kSectionName, 'searchkeytimeout', SearchKeyTimeout);
     ini.WriteBool(kSectionName, 'searchkeyonlysessionname', SearchKeyOnlySessionName);
+    ini.WriteBool(kSectionName, 'searchforsubstrings', Search_For_Substrings);
   finally
     ini.Free;
   end;
@@ -269,6 +272,7 @@ begin
     SessionsStartMenu := ini.ReadBool(kSectionName, 'sessions_startmenu', False);
     SearchKeyTimeout :=  ini.ReadInteger(kSectionName, 'searchkeytimeout', 3000);
     SearchKeyOnlySessionName := ini.ReadBool(kSectionName, 'searchkeyonlysessionname', True);
+    Search_For_Substrings := ini.ReadBool(kSectionName, 'searchforsubstrings', False);
   finally
     ini.Free;
   end;
@@ -448,10 +452,19 @@ begin
   Result := FullPathAndName;
 end;
 
+function SubstringFromBeginning(Fullstring: String; Substring: String): boolean;
+var SubFullString: String;
+begin
+      SubFullString := Copy(FullString, 1, Length(Substring));
+      Result := false;
+      if LowerCase(Substring) = LowerCase(SubFullString) then Result := true;
+end;
+
 procedure TFRM_Main.SearchAndSetListItem();
 var
   i : Integer;
   HostString: String;
+  found: boolean;
 begin
   if LastKeyString <> '' then
   begin
@@ -460,8 +473,12 @@ begin
       HostString := LSV_Hosts.items[i];
       if SearchKeyOnlySessionName = True then HostString:= GetHostName(HostString);
 
-      HostString := Copy(HostString, 1, Length(LastKeyString));
-      if LowerCase(LastKeyString) = LowerCase(HostString) then
+      if Search_For_Substrings then
+        found := AnsiContainsText(HostString, LastKeyString)
+      else
+        found := SubstringFromBeginning(HostString, LastKeyString);
+
+      if found then
       begin
         LSV_Hosts.itemindex := i;
         break;

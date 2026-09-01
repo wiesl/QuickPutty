@@ -1,7 +1,7 @@
 object FRM_Main: TFRM_Main
   Left = 820
   Top = 145
-  Width = 124
+  Width = 168
   Height = 116
   AlphaBlend = True
   AlphaBlendValue = 150
@@ -10,7 +10,7 @@ object FRM_Main: TFRM_Main
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
+  Font.Height = -14
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   FormStyle = fsStayOnTop
@@ -18,15 +18,15 @@ object FRM_Main: TFRM_Main
   PopupMenu = PopupMenu1
   OnClose = FormClose
   OnCreate = FormCreate
-  PixelsPerInch = 96
-  TextHeight = 13
+  PixelsPerInch = 120
+  TextHeight = 16
   object LSV_Hosts: TListBox
     Left = 0
     Top = 0
-    Width = 116
-    Height = 89
+    Width = 160
+    Height = 79
     Align = alClient
-    ItemHeight = 13
+    ItemHeight = 16
     TabOrder = 0
     OnDblClick = LSV_HostsDblClick
     OnKeyPress = LSV_HostsKeyPress

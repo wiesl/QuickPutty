@@ -33,6 +33,8 @@ type
     CBX_UseKiTTYSessions: TCheckBox;
     EDT_KiTTYConfigPath: TLabeledEdit;
     Button2: TButton;
+    CBX_Search_Key_Only_Session_Name: TCheckBox;
+    CBX_Search_For_Substrings: TCheckBox;
     EDT_KiTTY_Ignore_Session_Filter: TLabeledEdit;
     CBX_KiTTY_Sort_Directories_First: TCheckBox;
     CBX_KiTTY_Sort_Directories_Case_Insensitive: TCheckBox;
@@ -52,7 +54,7 @@ type
   private
     { Private declarations }
     procedure InfoMessage(Text: String);
-    procedure ErrorMessage(Text: String);    
+    procedure ErrorMessage(Text: String);
   public
     { Public declarations }
     procedure CreateSessionShortCuts(OnStartMenu: Boolean; PuttyPath: String);
@@ -461,6 +463,9 @@ begin
       end;
     end;
 
+    FRM_Main.SearchKeyOnlySessionName := CBX_Search_Key_Only_Session_Name.Checked;
+    FRM_Main.Search_For_Substrings := CBX_Search_For_Substrings.Checked;
+
     FRM_Main.SessionShortCuts := CBX_Sessions.Checked;
     FRM_Main.SessionsStartMenu := CBX_Sessions_StartMenu.Checked;
     FRM_Main.SystemWideHotKey:=CBX_SystemWideHotkey.Checked;
@@ -486,6 +491,9 @@ begin
   Reg := TRegistry.Create;
   Reg.RootKey := HKEY_CURRENT_USER;
   Reg.LazyWrite := true;
+
+  CBX_Search_Key_Only_Session_Name.Checked := (FRM_Main.SearchKeyOnlySessionName);
+  CBX_Search_For_Substrings.Checked := (FRM_Main.Search_For_Substrings);
 
   EDT_PuttyPath.Text:=FRM_Main.PuttyPath;
   TRB_Transparency.Position:=FRM_Main.AlphaBlendValue;
