@@ -9,7 +9,7 @@ uses
 const
   CRLF=#10;
   kApplicationName='QuickPutty';
-  kVersion = 'v1.1.5';
+  kVersion = 'v1.1.6';
   kFullApplicationName=kApplicationName+' '+kVersion;
   kCopyright = '(c)2001-2003 Olivier DECKMYN, olivier@deckmyn.org';
   kLicense= 'This software complies to LGPL license, see http://www.gnu.org/licenses/lgpl.txt';
@@ -45,17 +45,14 @@ type
     MNI_Sessions: TMenuItem;
     FakeMenu: TMenuItem;
     ACT_Exit: TAction;
-    ACT_NewSession: TAction;                             //Added by Pat
     ACT_SaveConfig: TAction;
     SaveConfig1: TMenuItem;
     N3: TMenuItem;
-
+    NewSession1: TMenuItem;
     procedure Exit1Click(Sender: TObject);
     procedure ACT_PopulateHostListExecute(Sender: TObject);
     procedure LSV_HostsDblClick(Sender: TObject);
     procedure ACT_ConfigExecute(Sender: TObject);
-
-    procedure ACT_NewSessionExecute(Sender: TObject);    //Added by Pat
     procedure FormCreate(Sender: TObject);
     procedure ACT_HelpExecute(Sender: TObject);
     procedure ACT_ShowHideExecute(Sender: TObject);
@@ -65,6 +62,7 @@ type
     procedure HotKeyActivate(var Msg: TWMHotKey); message WM_HOTKEY;
     procedure LSV_HostsKeyPress(Sender: TObject; var Key: Char);
     procedure ACT_SaveConfigExecute(Sender: TObject);
+    procedure NewSession1Click(Sender: TObject);
   private
     { Private declarations }
     procedure WMMyTrayIconCallback(var Msg:TMessage); message WM_MYTRAYICONCALLBACK;
@@ -80,6 +78,8 @@ type
     IconData : TNotifyIconData;
     IconCount : integer;
     SystemWideHotKey : boolean;
+    SessionShortCuts: Boolean;
+    SessionsStartMenu: Boolean;
     procedure Populate();
     function url_unquote(s:string): string;
     procedure WriteConfig();
@@ -94,9 +94,7 @@ implementation
 
 {$R *.dfm}
 
-uses
-  Registry, Config, IniFiles;
-
+uses Registry, Config, IniFiles;
 const
   kSectionName = 'Application';
 
@@ -208,6 +206,8 @@ begin
     ini.WriteBool(kSectionName, 'usealpha', AlphaBlend);
     ini.WriteBool(kSectionName, 'alwaysontop', (FormStyle=fsStayOnTop));
     ini.WriteBool(kSectionName, 'systemwidehotkey', SystemWideHotKey);
+    ini.WriteBool(kSectionName, 'session_shortcuts', SessionShortCuts);
+    ini.WriteBool(kSectionName, 'sessions_startmenu', SessionsStartMenu);
   finally
     ini.Free;
   end;
@@ -235,7 +235,9 @@ begin
     if lBool then FormStyle:=fsStayOnTop else FormStyle:=fsNormal;
     PuttyPath:=ini.ReadString(kSectionName, 'PuttyPath', PuttyPath);
     AlphaBlendValue:=ini.ReadInteger(kSectionName, 'alpha', AlphaBlendValue);
-    SystemWideHotKey:=ini.ReadBool(kSectionName, 'systemwidehotkey', True)
+    SystemWideHotKey:=ini.ReadBool(kSectionName, 'systemwidehotkey', True);
+    SessionShortCuts := ini.ReadBool(kSectionName, 'session_shortcuts', False);
+    SessionsStartMenu := ini.ReadBool(kSectionName, 'sessions_startmenu', False);
   finally
     ini.Free;
   end;
@@ -261,17 +263,10 @@ var
   cmd : String;
 begin
   cmd:=PuttyPath;
-  if name<>''
-  then cmd:=cmd+' -load '+name;
+  If name <> '' Then
+    cmd := cmd +' -load "'+name+'"';
   WinExec(pchar(cmd), SW_SHOWNORMAL);
 end;
-
-
-procedure TFRM_Main.ACT_NewSessionExecute(Sender: TObject);   //Added by Pat
-begin                                                         //Added by Pat
-  OpenSession('');
-end;                                                          //Added by Pat
-
 
 procedure TFRM_Main.ACT_ConfigExecute(Sender: TObject);
 begin
@@ -301,7 +296,8 @@ begin
   ReadConfig;
   Populate;
   // Set System-Wide HotKey
-  If SystemWideHotKey then RegisterHotKey(Self.Handle,Ord('Q')-64,MOD_ALT,Ord('Q'));
+  if SystemWideHotKey Then
+    RegisterHotKey(Self.Handle,Ord('Q')-64,MOD_ALT,Ord('Q'));
 end;
 
 // Handle TaskBar Removal
@@ -389,6 +385,11 @@ end;
 procedure TFRM_Main.ACT_SaveConfigExecute(Sender: TObject);
 begin
   WriteConfig;
+end;
+
+procedure TFRM_Main.NewSession1Click(Sender: TObject);
+begin
+  OpenSession('');
 end;
 
 end.

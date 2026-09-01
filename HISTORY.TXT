@@ -1,3 +1,20 @@
+2004/01/15 : v1.1.6
+* Fixed "-load" bug with putty sessions name containing whitespaces
++ Redesigned Configuration dialog
++ It's not possible to set Putty path to a non-existing file
++ New option to make QuickPutty run on startup
++ New funcationality in Configuration:
+  + Create Start Menu shortcuts (to Putty, QuickPutty & Sessions)
+  + Remove Start Menu shortcuts
+  + Options for shortcuts:
+    + Create shortcuts for sessions
+    + Put session shortcuts directly on Start Menu (instead of Putty folder)
+    + Update session shortcuts on startup
+  + Added command line switch '-updatesessions' that updates start menu session shortcuts according to options) and then exits.
+
+Many many thanx to Henrik Djärv who did all the work for the additions of this release. OpenSource model rules ! :)
+
+
 2003/11/06 : v1.1.5
 + Added "Systemwide hotkey" option in configuration (needs restart of quickputty)
 + Added "New Session" in menu, to start an empty Putty session

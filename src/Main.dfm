@@ -1,8 +1,8 @@
 object FRM_Main: TFRM_Main
-  Left = 208
-  Top = 235
-  Width = 152
-  Height = 336
+  Left = 820
+  Top = 145
+  Width = 124
+  Height = 116
   AlphaBlend = True
   AlphaBlendValue = 150
   BorderStyle = bsSizeToolWin
@@ -23,8 +23,8 @@ object FRM_Main: TFRM_Main
   object LSV_Hosts: TListBox
     Left = 0
     Top = 0
-    Width = 144
-    Height = 309
+    Width = 116
+    Height = 89
     Align = alClient
     ItemHeight = 13
     TabOrder = 0
@@ -33,7 +33,7 @@ object FRM_Main: TFRM_Main
   end
   object PopupMenu1: TPopupMenu
     AutoHotkeys = maManual
-    Left = 88
+    Left = 48
     Top = 8
     object MNI_Sessions: TMenuItem
       Caption = '&Sessions'
@@ -41,9 +41,10 @@ object FRM_Main: TFRM_Main
         OnClick = FakeMenuClick
       end
     end
-    object ACT_NewSession1: TMenuItem
-      Action = ACT_NewSession
+    object NewSession1: TMenuItem
+      Caption = 'New Session'
       ShortCut = 16462
+      OnClick = NewSession1Click
     end
     object Update1: TMenuItem
       Action = ACT_PopulateHostList
@@ -74,16 +75,12 @@ object FRM_Main: TFRM_Main
     end
   end
   object ACL_Main: TActionList
-    Left = 24
+    Left = 16
     Top = 8
     object ACT_PopulateHostList: TAction
       Caption = '&Update'
       ShortCut = 116
       OnExecute = ACT_PopulateHostListExecute
-    end
-    object ACT_NewSession: TAction
-      Caption = 'New Session'
-      OnExecute = ACT_NewSessionExecute
     end
     object ACT_Config: TAction
       Caption = '&Configuration'
