@@ -67,7 +67,7 @@ type
     OneInstance : TOneInstance;
     procedure WndProc(var Msg : TMessage); override;
     procedure WMActivate(var msg:TMessage);message WM_ACTIVATE;
-    procedure SwitchVisible;
+    procedure SwitchVisible(aVisible : Integer=-1);
     procedure OpenSelectedSession;
   public
     { Public declarations }
@@ -217,7 +217,8 @@ begin
     Left:=ini.ReadInteger(kSectionName, 'left', Left);
     Top:=ini.ReadInteger(kSectionName, 'top', Top);
     try
-      Visible:=ini.ReadBool(kSectionName, 'visible', Visible);
+      lBool:=ini.ReadBool(kSectionName, 'visible', Visible);
+      if lBool then SwitchVisible(1) else SwitchVisible(0);
       AlphaBlend:=ini.ReadBool(kSectionName, 'usealpha', AlphaBlend);
       lBool:=ini.ReadBool(kSectionName, 'alwaysontop', True);
     except
@@ -332,10 +333,11 @@ begin
   Action:=caNone;
 end;
 
-procedure TFRM_Main.SwitchVisible;
+procedure TFRM_Main.SwitchVisible(aVisible : Integer=-1);
 begin
-  { reverse visibility state }
-  Visible := not Visible;
+  if aVisible<>-1
+  then Visible := (aVisible=1)
+  else Visible := not Visible; { reverse visibility state }
 
   { set showing of mainform to visibility state }
   Application.ShowMainForm := Visible;

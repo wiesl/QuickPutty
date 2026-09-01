@@ -14,3 +14,5 @@
 + Added "Save config" in menu in order to save configuration file immediatly (on my box, when users shuts down the computer, the .ini was not saved...don't ask me why !!!)
 + Only one instance of QuickPutty can be launch. A second launch raises the first window.
 
+2002/08/07 : v1.1.4
+* Fixed 'visible=0' bug at startup

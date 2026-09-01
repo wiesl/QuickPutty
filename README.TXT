@@ -1,4 +1,4 @@
-QuickPutty v1.1.3
+QuickPutty v1.1.4
 ---
 
 This is a stupid application that allows to quickly launch a putty session.
