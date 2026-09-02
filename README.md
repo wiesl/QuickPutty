@@ -11,18 +11,34 @@ PuTTY can be found at the [PuTTY homepage](https://www.chiark.greenend.org.uk/~s
 
 **WARNING:** Please keep in mind that the following homepage is **NOT** an official PuTTY site, therefore not linked: [https://putty.org/]()).
 
+## Screenshots
+
+*(click an image to enlarge)*
+
+Screnshot of the QuickPutty application with config dialog:
+
+<a href="ScreenShot.gif"><img src="ScreenShot.gif" width="309" alt="Screnshot of the QuickPutty application with config dialog"></a>
+
+---
+
 ## ⬇️ Download
 Grab the latest build from the **[Releases page →](https://github.com/wiesl/QuickPutty/releases/latest)**.
+
+---
 
 ## Known issues
 Currently no issues are known. As the new [KiTTY](https://github.com/hknet/KiTTY) evolves and a new directory structure has been implemented: Changes might be necessary to support the new directory structure.
 
 Found something else? Please **[open an issue](https://github.com/wiesl/QuickPutty/issues)**.
 
+---
+
 ## License & Credits
 ### License
 Feel free to modify the source, as long as you respect LGPL licensing.
 Pull requests are welcome.
+
+---
 
 ### Credits
 **[QuickPutty](https://github.com/wiesl/QuickPutty)** has been originally developed with PuTTY support by Olivier DECKMYN (thnx.). Later on Gerhard WIESINGER ("wiesl") has added support for KiTTY.
